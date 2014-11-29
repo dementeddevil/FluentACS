@@ -1,7 +1,7 @@
-﻿namespace FluentACS.Specs.Rules
-{
-    using FluentACS.Specs.Rules.Chaining;
+﻿using FluentACS.Specs.Rules.Chaining;
 
+namespace FluentACS.Specs.Rules
+{
     public class InputClaimTypeSpec
     {
         private readonly RuleSpec owner;

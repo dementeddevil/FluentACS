@@ -1,56 +1,55 @@
-﻿namespace FluentACS.Specs
+﻿using System;
+using System.Collections.Generic;
+using FluentACS.Commands;
+using FluentACS.Specs.Rules;
+using FluentACS.Specs.Rules.Chaining;
+
+namespace FluentACS.Specs
 {
-    using System;
-    using System.Collections.Generic;
+	public class RuleGroupSpec
+	{
+		private readonly List<ICommand> commands;
 
-    using FluentACS.Commands;
-    using FluentACS.Specs.Rules;
-    using FluentACS.Specs.Rules.Chaining;
+		private readonly string relyingPartyName;
 
-    public class RuleGroupSpec
-    {
-        private readonly List<ICommand> commands;
+		private string name;
 
-        private readonly string relyingPartyName;
+		public RuleGroupSpec(List<ICommand> commands, string relyingPartyName)
+		{
+			Guard.NotNullOrEmpty(() => relyingPartyName, relyingPartyName);
 
-        private string name;
+			this.commands = commands;
+			this.relyingPartyName = relyingPartyName;
+		}
 
-        public RuleGroupSpec(List<ICommand> commands, string relyingPartyName)
-        {
-            Guard.NotNullOrEmpty(() => relyingPartyName, relyingPartyName);
+		public RuleGroupSpec AddRule(Action<IStartRuleSpec> configAction)
+		{
+			Guard.NotNull(() => configAction, configAction);
 
-            this.commands = commands;
-            this.relyingPartyName = relyingPartyName;
-        }
+			var spec = new RuleSpec(this.Name());
+			configAction(spec);
 
-        public RuleGroupSpec AddRule(Action<IStartRuleSpec> configAction)
-        {
-            Guard.NotNull(() => configAction, configAction);
+			this.commands.Add(new AddRuleCommand(spec));
 
-            var spec = new RuleSpec(this.Name());
-            configAction(spec);
+			return this;
+		}
 
-            this.commands.Add(new AddRuleCommand(spec));
+		public RuleGroupSpec Name(string name)
+		{
+			Guard.NotNullOrEmpty(() => name, name);
 
-            return this;
-        }
+			this.name = name;
+			return this;
+		}
 
-        public RuleGroupSpec Name(string name)
-        {
-            Guard.NotNullOrEmpty(() => name, name);
+		internal string Name()
+		{
+			return this.name;
+		}
 
-            this.name = name;
-            return this;
-        }
-
-        internal string Name()
-        {
-            return this.name;
-        }
-
-        internal string RelyingPartyName()
-        {
-            return this.relyingPartyName;
-        }
-    }
+		internal string RelyingPartyName()
+		{
+			return this.relyingPartyName;
+		}
+	}
 }

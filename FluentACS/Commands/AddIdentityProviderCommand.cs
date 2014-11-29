@@ -1,65 +1,74 @@
 ﻿namespace FluentACS.Commands
 {
-    using System;
-    using System.Linq;
+	using System;
+	using System.Linq;
 
-    using FluentACS.Logging;
-    using FluentACS.ManagementService;
-    using FluentACS.Specs;
+	using FluentACS.Logging;
+	using FluentACS.ManagementService;
+	using FluentACS.Specs;
+	using FluentACS.Specs.FluentACS.Specs;
 
-    public class AddIdentityProviderCommand : BaseCommand
-    {
-        private readonly IdentityProviderSpec identityProviderSpec;
+	public class AddIdentityProviderCommand : BaseCommand
+	{
+		private readonly IdentityProviderSpec identityProviderSpec;
 
-        public AddIdentityProviderCommand(IdentityProviderSpec identityProviderSpec)
-        {
-            Guard.NotNull(() => identityProviderSpec, identityProviderSpec);
+		public AddIdentityProviderCommand(IdentityProviderSpec identityProviderSpec)
+		{
+			Guard.NotNull(() => identityProviderSpec, identityProviderSpec);
 
-            this.identityProviderSpec = identityProviderSpec;
-        }
+			this.identityProviderSpec = identityProviderSpec;
+		}
 
-        public override void Execute(object receiver, Action<LogInfo> logAction)
-        {
-            // AddIdentityProviderCommand has branches for each of
-            // the spec types. At present this is at the limit of its
-            // scalability;
-            
-            // TODO: consider refactoring to reduce the cyclomatic complexity of the Execute method.
+		public override void Execute(object receiver, Action<LogInfo> logAction)
+		{
+			// AddIdentityProviderCommand has branches for each of
+			// the spec types. At present this is at the limit of its
+			// scalability;
 
-            var acsWrapper = (ServiceManagementWrapper)receiver;
+			// TODO: consider refactoring to reduce the cyclomatic complexity of the Execute method.
 
-            var idpToRemove = acsWrapper.RetrieveIdentityProviders().Where(idp => idp.DisplayName.Equals(this.identityProviderSpec.DisplayName())).SingleOrDefault();
-            if (idpToRemove != null)
-            {
-                this.LogMessage(logAction, string.Format("Removing Identity Provider '{0}'", idpToRemove.DisplayName));
-                acsWrapper.RemoveIdentityProvider(idpToRemove.DisplayName);
-                this.LogSavingChangesMessage(logAction);
-            }
+			var acsWrapper = (ServiceManagementWrapper)receiver;
 
-            if (this.identityProviderSpec is GoogleIdentityProviderSpec)
-            {
-                this.LogMessage(logAction, string.Format("Adding Identity Provider '{0}'", this.identityProviderSpec.DisplayName()));
-                acsWrapper.AddGoogleIdentityProvider();
-                this.LogSavingChangesMessage(logAction);
-            }
+			var idpToRemove = acsWrapper.RetrieveIdentityProviders().Where(idp => idp.DisplayName.Equals(this.identityProviderSpec.DisplayName())).SingleOrDefault();
+			if (idpToRemove != null)
+			{
+				this.LogMessage(logAction, string.Format("Removing Identity Provider '{0}'", idpToRemove.DisplayName));
+				acsWrapper.RemoveIdentityProvider(idpToRemove.DisplayName);
+				this.LogSavingChangesMessage(logAction);
+			}
 
-            if (this.identityProviderSpec is YahooIdentityProviderSpec)
-            {
-                this.LogMessage(logAction, string.Format("Adding Identity Provider '{0}'", this.identityProviderSpec.DisplayName()));
-                acsWrapper.AddYahooIdentityProvider();
-                this.LogSavingChangesMessage(logAction);
-            }
+			if (this.identityProviderSpec is GoogleIdentityProviderSpec)
+			{
+				this.LogMessage(logAction, string.Format("Adding Identity Provider '{0}'", this.identityProviderSpec.DisplayName()));
+				acsWrapper.AddGoogleIdentityProvider();
+				this.LogSavingChangesMessage(logAction);
+			}
 
-            if (this.identityProviderSpec is FacebookIdentityProviderSpec)
-            {
-                var facebookIdentityProviderSpec = (FacebookIdentityProviderSpec)identityProviderSpec;
-                this.LogMessage(logAction, string.Format("Adding Identity Provider '{0}'", facebookIdentityProviderSpec.DisplayName()));
-                acsWrapper.AddFacebookIdentityProvider(facebookIdentityProviderSpec.DisplayName(),
-                    facebookIdentityProviderSpec.AppId(), 
-                    facebookIdentityProviderSpec.AppSecret(),
-                    facebookIdentityProviderSpec.ApplicationPermissions());
-                this.LogSavingChangesMessage(logAction);
-            }
-        }
-    }
+			if (this.identityProviderSpec is YahooIdentityProviderSpec)
+			{
+				this.LogMessage(logAction, string.Format("Adding Identity Provider '{0}'", this.identityProviderSpec.DisplayName()));
+				acsWrapper.AddYahooIdentityProvider();
+				this.LogSavingChangesMessage(logAction);
+			}
+
+			if (this.identityProviderSpec is FacebookIdentityProviderSpec)
+			{
+				var facebookIdentityProviderSpec = (FacebookIdentityProviderSpec)identityProviderSpec;
+				this.LogMessage(logAction, string.Format("Adding Identity Provider '{0}'", facebookIdentityProviderSpec.DisplayName()));
+				acsWrapper.AddFacebookIdentityProvider(facebookIdentityProviderSpec.DisplayName(),
+					facebookIdentityProviderSpec.AppId(),
+					facebookIdentityProviderSpec.AppSecret(),
+					facebookIdentityProviderSpec.ApplicationPermissions());
+				this.LogSavingChangesMessage(logAction);
+			}
+			
+			if (this.identityProviderSpec is WsFederationIdentityProviderSpec)
+			{
+				var wsFederationIdentityProviderSpec = (WsFederationIdentityProviderSpec)identityProviderSpec;
+				this.LogMessage(logAction, string.Format("Adding Identity Provider '{0}'", wsFederationIdentityProviderSpec.DisplayName()));
+				acsWrapper.AddIdentityProviderManually(wsFederationIdentityProviderSpec.DisplayName(), wsFederationIdentityProviderSpec.MetadataUri(), WebSSOProtocolType.WsFederation);
+				this.LogSavingChangesMessage(logAction);
+			}
+		}
+	}
 }

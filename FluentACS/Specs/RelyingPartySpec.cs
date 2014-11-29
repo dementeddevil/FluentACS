@@ -1,11 +1,11 @@
-﻿namespace FluentACS.Specs
+﻿    using FluentACS.Commands;
+    using FluentACS.ManagementService;
+
+namespace FluentACS.Specs
 {
     using System;
     using System.Collections.Generic;
     using System.Security.Cryptography.X509Certificates;
-
-    using FluentACS.Commands;
-    using FluentACS.ManagementService;
 
     public class RelyingPartySpec : BaseSpec
     {

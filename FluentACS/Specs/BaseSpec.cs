@@ -1,8 +1,8 @@
-﻿namespace FluentACS.Specs
-{
-    using System.Collections.Generic;
+﻿using FluentACS.Commands;
+using System.Collections.Generic;
 
-    using FluentACS.Commands;
+namespace FluentACS.Specs
+{
 
     public class BaseSpec
     {
